@@ -4,9 +4,9 @@ import org.apache.spark._
 import org.apache.log4j._
 import scala.math.max
 
-/** Find the maximum temperature by weather station for a year */
+
 object MaxTemperatures {
-  
+  //procesamos fichero
   def parseLine(line:String): (String, String, Float) = {
     val fields = line.split(",")
     val stationID = fields(0)
@@ -14,15 +14,17 @@ object MaxTemperatures {
     val temperature = fields(3).toFloat * 0.1f * (9.0f / 5.0f) + 32.0f
     (stationID, entryType, temperature)
   }
-    /** Our main function where the action happens */
+
   def main(args: Array[String]) {
    
-    // Set the log level to only print errors
+    // logs
     Logger.getLogger("org").setLevel(Level.ERROR)
     
-    // Create a SparkContext using every core of the local machine
+    // SparkContext
     val sc = new SparkContext("local[*]", "MaxTemperatures")
-    
+
+
+    //mismo procedimiento que con tmin
     val lines = sc.textFile("data/1800.csv")
     val parsedLines = lines.map(parseLine)
     val maxTemps = parsedLines.filter(x => x._2 == "TMAX")

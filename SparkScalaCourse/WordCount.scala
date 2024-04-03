@@ -3,28 +3,32 @@ package com.sundogsoftware.spark
 import org.apache.spark._
 import org.apache.log4j._
 
-/** Count up how many of each word appears in a book as simply as possible. */
+
 object WordCount {
  
-  /** Our main function where the action happens */
+
   def main(args: Array[String]) {
    
-    // Set the log level to only print errors
+    // logs
     Logger.getLogger("org").setLevel(Level.ERROR)
     
-     // Create a SparkContext using every core of the local machine
+     // SparkContext
     val sc = new SparkContext("local[*]", "WordCount")   
     
-    // Read each line of my book into an RDD
+    // leer datos
     val input = sc.textFile("data/book.txt")
     
-    // Split into words separated by a space character
+    // separar por espacios
     val words = input.flatMap(x => x.split(" "))
+    val primerasWords = words.take(5)
+    println("Primeras filas de words:")
+    primerasWords.foreach(println)
+    println("\n")
     
-    // Count up the occurrences of each word
+    // contamos cada palabra
     val wordCounts = words.countByValue()
     
-    // Print the results.
+    // imprimimos
     wordCounts.foreach(println)
   }
   

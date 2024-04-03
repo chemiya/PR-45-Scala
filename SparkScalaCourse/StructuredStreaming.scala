@@ -20,6 +20,8 @@ object StructuredStreaming {
       .master("local[*]")
       .getOrCreate()
 
+    println("iniciado")
+
     // Streaming source that monitors the data/logs directory for text files
     val accessLines = spark.readStream.text("data/logs")
 

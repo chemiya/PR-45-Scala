@@ -13,6 +13,8 @@ import scala.math.sqrt
 // aws s3 cp s3://sundog-spark/ml-1m/movies.dat ./
 // spark-submit --executor-memory 1g MovieSimilarities1M.jar 260
 
+//c:\spark\bin\spark-submit --class com.sundogsoftware.spark.HelloWorld C:\Users\jmlozanoo\Desktop\software\curso-spark-scala\SparkScalaCourse\SparkScalaCourse\out\artifacts\SparkCourse\SparkCourse.jar
+//sbt assembly
 
 object MovieSimilarities1M {
   

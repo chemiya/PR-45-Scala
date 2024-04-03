@@ -5,26 +5,26 @@ import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{IntegerType, LongType, StructType}
 
-/** Find the movies with the most ratings. */
+
 object PopularMoviesDataset {
 
-  // Case class so we can get a column name for our movie ID
+  //creamos la clase
   final case class Movie(movieID: Int)
 
-  /** Our main function where the action happens */
+
   def main(args: Array[String]) {
    
-    // Set the log level to only print errors
+    // logs
     Logger.getLogger("org").setLevel(Level.ERROR)
     
-    // Use new SparkSession interface in Spark 2.0
+    // SparkSession
     val spark = SparkSession
       .builder
       .appName("PopularMovies")
       .master("local[*]")
       .getOrCreate()
 
-    // Create schema when reading u.data
+    // Crear schema
     val moviesSchema = new StructType()
       .add("userID", IntegerType, nullable = true)
       .add("movieID", IntegerType, nullable = true)
@@ -33,17 +33,17 @@ object PopularMoviesDataset {
 
     import spark.implicits._
 
-    // Load up movie data as dataset
+    // leemos datos
     val moviesDS = spark.read
       .option("sep", "\t")
       .schema(moviesSchema)
       .csv("data/ml-100k/u.data")
       .as[Movie]
     
-    // Some SQL-style magic to sort all movies by popularity in one line!
+    // agrupamos contamos y ordenamos
     val topMovieIDs = moviesDS.groupBy("movieID").count().orderBy(desc("count"))
 
-    // Grab the top 10
+    // contamos 10 mejores
     topMovieIDs.show(10)
 
     // Stop the session

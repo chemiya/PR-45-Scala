@@ -3,32 +3,40 @@ package com.sundogsoftware.spark
 import org.apache.spark._
 import org.apache.log4j._
 
-/** Count up how many of each star rating exists in the MovieLens 100K data set. */
+
 object RatingsCounter {
  
-  /** Our main function where the action happens */
+
   def main(args: Array[String]) {
    
-    // Set the log level to only print errors
+    //logs
     Logger.getLogger("org").setLevel(Level.ERROR)
         
-    // Create a SparkContext using every core of the local machine, named RatingsCounter
+    // SparkContext
     val sc = new SparkContext("local[*]", "RatingsCounter")
    
-    // Load up each line of the ratings data into an RDD
+    // leer datos
     val lines = sc.textFile("data/ml-100k/u.data")
     
-    // Convert each line to a string, split it out by tabs, and extract the third field.
-    // (The file format is userID, movieID, rating, timestamp)
+    // separamos por tab y cogemos elemento 2
+    // formato userID, movieID, rating, timestamp
     val ratings = lines.map(x => x.split("\t")(2))
+    println(ratings.getClass)
+    val primerasFilasRatings = ratings.take(5)
+    println("Primeras filas de Ratings:")
+    primerasFilasRatings.foreach(println)
     
-    // Count up how many times each value (rating) occurs
+    // contamos cuantos de cada uno
     val results = ratings.countByValue()
+    println(results.getClass)
+    val primerasFilasResults = results.take(5)
+    println("Primeras filas de results:")
+    primerasFilasResults.foreach(println)
     
-    // Sort the resulting map of (rating, count) tuples
+    // mostramos resultados ordenados
     val sortedResults = results.toSeq.sortBy(_._1)
     
-    // Print each result on its own line.
+    // cada uno se imprime en una linea
     sortedResults.foreach(println)
   }
 }

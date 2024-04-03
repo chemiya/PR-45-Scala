@@ -1,7 +1,7 @@
-   // VALUES are immutable constants.
+   // val imutables
    val hello: String = "Hola!"
 
-   // VARIABLES are mutable
+   // var mutables
    var helloThere: String = hello
    helloThere = hello + " There!"
    println(helloThere)
@@ -9,8 +9,7 @@
    val immutableHelloThere = hello + " There"
    println(immutableHelloThere)
 
-   // Data Types
-
+   // tipos
    val numberOne: Int = 1
    val truth: Boolean = true
    val letterA: Char = 'a'
@@ -19,6 +18,8 @@
    val bigNumber: Long = 123456789
    val smallNumber: Byte = 127
 
+
+   //imprimir
    println("Here is a mess: " + numberOne + truth + letterA + pi + bigNumber)
 
    println(f"Pi is about $piSinglePrecision%.3f")
@@ -34,16 +35,15 @@
    val answer = answerString.toInt
    println(answer)
 
-   // Booleans
+   // operadores logicos
    val isGreater = 1 > 2
    val isLesser = 1 < 2
    val impossible = isGreater & isLesser
+   val impossibleBetter = isGreater && isLesser
    val anotherWay = isGreater || isLesser
 
    val picard: String = "Picard"
    val bestCaptain: String = "Picard"
    val isBest: Boolean = picard == bestCaptain
 
-   // EXERCISE
-   // Write some code that takes the value of pi, doubles it, and then prints it within a string with
-   // three decimal places of precision to the right.
+

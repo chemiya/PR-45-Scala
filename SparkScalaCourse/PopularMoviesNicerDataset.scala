@@ -7,24 +7,28 @@ import org.apache.spark.sql.types.{IntegerType, LongType, StructType}
 
 import scala.io.{Codec, Source}
 
-/** Find the movies with the most ratings. */
+
 object PopularMoviesNicerDataset {
 
+  //clase
   case class Movies(userID: Int, movieID: Int, rating: Int, timestamp: Long)
 
-  /** Load up a Map of movie IDs to movie names. */
+
   def loadMovieNames() : Map[Int, String] = {
 
-    // Handle character encoding issues:
-    implicit val codec: Codec = Codec("ISO-8859-1") // This is the current encoding of u.item, not UTF-8.
+    // para interpretar los datos
+    implicit val codec: Codec = Codec("ISO-8859-1")
 
-    // Create a Map of Ints to Strings, and populate it from u.item.
+    // creamos un mapa
     var movieNames:Map[Int, String] = Map()
 
+    //leemos
     val lines = Source.fromFile("data/ml-100k/u.item")
     for (line <- lines.getLines()) {
+      //separamos
       val fields = line.split('|')
       if (fields.length > 1) {
+        //añadimos al mapa
         movieNames += (fields(0).toInt -> fields(1))
       }
     }
@@ -33,29 +37,30 @@ object PopularMoviesNicerDataset {
     movieNames
   }
 
-  /** Our main function where the action happens */
+
   def main(args: Array[String]) {
    
-    // Set the log level to only print errors
+    // log
     Logger.getLogger("org").setLevel(Level.ERROR)
 
-    // Create a SparkSession using every core of the local machine
+    // SparkSession
     val spark = SparkSession
       .builder
       .appName("PopularMoviesNicer")
       .master("local[*]")
       .getOrCreate()
 
+    //llamamos funcion
     val nameDict = spark.sparkContext.broadcast(loadMovieNames())
 
-    // Create schema when reading u.data
+    // schema
     val moviesSchema = new StructType()
       .add("userID", IntegerType, nullable = true)
       .add("movieID", IntegerType, nullable = true)
       .add("rating", IntegerType, nullable = true)
       .add("timestamp", LongType, nullable = true)
 
-    // Load up movie data as dataset
+    // leemos
     import spark.implicits._
     val movies = spark.read
       .option("sep", "\t")
@@ -63,27 +68,24 @@ object PopularMoviesNicerDataset {
       .csv("data/ml-100k/u.data")
       .as[Movies]
 
-    // Get number of reviews per movieID
+    // contamos agrupando por id
     val movieCounts = movies.groupBy("movieID").count()
 
-    // Create a user-defined function to look up movie names from our
-    // shared Map variable.
-
-    // We start by declaring an "anonymous function" in Scala
+    //que busque por id el nombre
     val lookupName : Int => String = (movieID:Int)=>{
       nameDict.value(movieID)
     }
 
-    // Then wrap it with a udf
+    //utilizamos udf
     val lookupNameUDF = udf(lookupName)
 
-    // Add a movieTitle column using our new udf
+    // añadimos nueva columna procesando el campo nuevo
     val moviesWithNames = movieCounts.withColumn("movieTitle", lookupNameUDF(col("movieID")))
 
-    // Sort the results
+    // ordenamos
     val sortedMoviesWithNames = moviesWithNames.sort("count")
 
-    // Show the results without truncating it
+    // mostramos todo
     sortedMoviesWithNames.show(sortedMoviesWithNames.count.toInt, truncate = false)
   }
 }

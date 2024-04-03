@@ -4,24 +4,24 @@ import org.apache.spark.sql._
 import org.apache.log4j._
     
 object DataFramesDataset {
-  
+
+  //creamos clase
   case class Person(id:Int, name:String, age:Int, friends:Int)
 
-  /** Our main function where the action happens */
+
   def main(args: Array[String]) {
     
-    // Set the log level to only print errors
+    // log
     Logger.getLogger("org").setLevel(Level.ERROR)
     
-    // Use new SparkSession interface in Spark 2.0
+    // SparkSession
     val spark = SparkSession
       .builder
       .appName("SparkSQL")
       .master("local[*]")
       .getOrCreate()
 
-    // Convert our csv file to a DataSet, using our Person case
-    // class to infer the schema.
+    // leemos datos convirtiendo en la clase
     import spark.implicits._
     val people = spark.read
       .option("header", "true")
@@ -29,22 +29,25 @@ object DataFramesDataset {
       .csv("data/fakefriends.csv")
       .as[Person]
 
-    // There are lots of other ways to make a DataFrame.
-    // For example, spark.read.json("json file path")
-    // or sqlContext.table("Hive table name")
-    
+
+    //imprimimos esquema
     println("Here is our inferred schema:")
     people.printSchema()
-    
+
+    //imprimimos columna
     println("Let's select the name column:")
     people.select("name").show()
-    
+
+    //filtramos
     println("Filter out anyone over 21:")
     people.filter(people("age") < 21).show()
-   
+
+
+    //agrupamos
     println("Group by age:")
     people.groupBy("age").count().show()
-    
+
+    //sumamos 10 a los años
     println("Make everyone 10 years older:")
     people.select(people("name"), people("age") + 10).show()
     

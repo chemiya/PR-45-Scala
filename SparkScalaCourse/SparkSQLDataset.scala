@@ -5,22 +5,25 @@ import org.apache.log4j._
 
 object SparkSQLDataset {
 
+
+
+  //clase
   case class Person(id:Int, name:String, age:Int, friends:Int)
 
-  /** Our main function where the action happens */
+
   def main(args: Array[String]) {
     
-    // Set the log level to only print errors
+    // logs
     Logger.getLogger("org").setLevel(Level.ERROR)
     
-    // Use SparkSession interface
+    // SparkSession
     val spark = SparkSession
       .builder
       .appName("SparkSQL")
       .master("local[*]")
       .getOrCreate()
 
-    // Load each line of the source data into an Dataset
+    // leemos csv con elementos como clase
     import spark.implicits._
     val schemaPeople = spark.read
       .option("header", "true")
@@ -29,9 +32,12 @@ object SparkSQLDataset {
       .as[Person]
 
     schemaPeople.printSchema()
-    
+
+    //creamos vista sql
     schemaPeople.createOrReplaceTempView("people")
 
+
+    //filtramos
     val teenagers = spark.sql("SELECT * FROM people WHERE age >= 13 AND age <= 19")
     
     val results = teenagers.collect()

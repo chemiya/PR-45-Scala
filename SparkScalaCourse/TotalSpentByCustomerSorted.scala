@@ -3,37 +3,48 @@ package com.sundogsoftware.spark
 import org.apache.spark._
 import org.apache.log4j._
 
-/** Compute the total amount spent per customer in some fake e-commerce data. */
+
 object TotalSpentByCustomerSorted {
   
-  /** Convert input data to (customerID, amountSpent) tuples */
+  /** Convertimos a (customerID, amountSpent) tuplas */
   def extractCustomerPricePairs(line: String): (Int, Float) = {
     val fields = line.split(",")
     (fields(0).toInt, fields(2).toFloat)
   }
  
-  /** Our main function where the action happens */
+
   def main(args: Array[String]) {
    
-    // Set the log level to only print errors
+    // logs
     Logger.getLogger("org").setLevel(Level.ERROR)
     
-     // Create a SparkContext using every core of the local machine
+     // SparkContext
     val sc = new SparkContext("local[*]", "TotalSpentByCustomerSorted")   
-    
+
+
+    //cargamos datos
     val input = sc.textFile("data/customer-orders.csv")
 
+
+    //procesamos
     val mappedInput = input.map(extractCustomerPricePairs)
-    
+
+    //acumulamos amount por usuario
     val totalByCustomer = mappedInput.reduceByKey( (x,y) => x + y )
-    
+
+    //cambiamos orden
     val flipped = totalByCustomer.map( x => (x._2, x._1) )
-    
+    val primerasFlipped= flipped.take(5)
+    println("Primeras filas de flipped:")
+    primerasFlipped.foreach(println)
+    println("\n")
+
+    //ordenamos
     val totalByCustomerSorted = flipped.sortByKey()
     
     val results = totalByCustomerSorted.collect()
     
-    // Print the results.
+
     results.foreach(println)
   }
   

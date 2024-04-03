@@ -4,53 +4,66 @@ import org.apache.log4j._
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 
-/** Count up how many of each word occurs in a book, using regular expressions and sorting the final results */
+
 object WordCountBetterSortedDataset {
 
+  //clase
   case class Book(value: String)
 
-  /** Our main function where the action happens */
+
   def main(args: Array[String]) {
 
-    // Set the log level to only print errors
+    // logs
     Logger.getLogger("org").setLevel(Level.ERROR)
 
-    // Create a SparkSession using every core of the local machine
+    // SparkSession
     val spark = SparkSession
       .builder
       .appName("WordCount")
       .master("local[*]")
       .getOrCreate()
 
-    // Read each line of my book into an Dataset
+    // leemos fichero procesandolo
     import spark.implicits._
     val input = spark.read.text("data/book.txt").as[Book]
 
-    // Split using a regular expression that extracts words
+    // buscamos las palabras
     val words = input
       .select(explode(split($"value", "\\W+")).alias("word"))
       .filter($"word" =!= "")
 
-    // Normalize everything to lowercase
+    // ponemos a minusculas
     val lowercaseWords = words.select(lower($"word").alias("word"))
 
-    // Count up the occurrences of each word
+    // agrupamos y contamos
     val wordCounts = lowercaseWords.groupBy("word").count()
 
-    // Sort by counts
+    // ordenamos
     val wordCountsSorted = wordCounts.sort("count")
 
-    // Show the results.
+    // mostramos todos
     wordCountsSorted.show(wordCountsSorted.count.toInt)
 
 
-    // ANOTHER WAY TO DO IT (Blending RDD's and Datasets)
+
+
+
+
+
+    // leemos
     val bookRDD = spark.sparkContext.textFile("data/book.txt")
+
+    //filtramos palabras
     val wordsRDD = bookRDD.flatMap(x => x.split("\\W+"))
     val wordsDS = wordsRDD.toDS()
 
+    //convertimos a minusculas
     val lowercaseWordsDS = wordsDS.select(lower($"value").alias("word"))
+
+    //contamos
     val wordCountsDS = lowercaseWordsDS.groupBy("word").count()
+
+    //ordenamos
     val wordCountsSortedDS = wordCountsDS.sort("count")
     wordCountsSortedDS.show(wordCountsSortedDS.count.toInt)
 
